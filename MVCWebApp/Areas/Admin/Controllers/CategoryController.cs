@@ -3,18 +3,18 @@ using MVCWeb.DataAccess.Data;
 using MVCWeb.DataAccess.Repository.IRepository;
 using MVCWeb.Models;
 
-namespace MVCWebApp.Controllers
+namespace MVCWebApp.Areas.Admin.Controllers
 {
     public class CategoryController : Controller
     {
-        private readonly ICategoryRepository _categoryRepo;
-        public CategoryController(ICategoryRepository db)
+        private readonly IUnitOfWork _unitOfWork;
+        public CategoryController(IUnitOfWork unitOfWork)
         {
-            _categoryRepo = db;
+            _unitOfWork = unitOfWork;
         }
         public IActionResult Index()
         {
-            List<Category> categories = _categoryRepo.GetAll().ToList();
+            List<Category> categories = _unitOfWork.Category.GetAll().ToList();
             return View(categories);
         }
 
@@ -37,10 +37,10 @@ namespace MVCWebApp.Controllers
 
             if (ModelState.IsValid)
             {
-            _categoryRepo.Add(obj);
-            _categoryRepo.Save();
-            TempData["success"] = "Category created successfully";
-            return RedirectToAction("Index");
+                _unitOfWork.Category.Add(obj);
+                _unitOfWork.Save();
+                TempData["success"] = "Category created successfully";
+                return RedirectToAction("Index");
             }
             return View();
         }
@@ -58,7 +58,7 @@ namespace MVCWebApp.Controllers
             // // If finding by any criteria
             //Category? categoryObj2 = _db.Categories.Where(c => c.Id == id).FirstOrDefault();
 
-            Category? categoryObj = _categoryRepo.Get(c => c.Id == id);
+            Category? categoryObj = _unitOfWork.Category.Get(c => c.Id == id);
 
             if (categoryObj == null)
             {
@@ -72,8 +72,8 @@ namespace MVCWebApp.Controllers
         {
             if (ModelState.IsValid)
             {
-                _categoryRepo.Update(categoryObj);
-                _categoryRepo.Save();
+                _unitOfWork.Category.Update(categoryObj);
+                _unitOfWork.Save();
                 TempData["success"] = "Category updated successfully";
                 return RedirectToAction("Index");
             }
@@ -87,7 +87,7 @@ namespace MVCWebApp.Controllers
             }
 
             //If finding by primary key 
-            Category? categoryObj = _categoryRepo.Get(c => c.Id == id);
+            Category? categoryObj = _unitOfWork.Category.Get(c => c.Id == id);
 
             if (categoryObj == null)
             {
@@ -98,13 +98,13 @@ namespace MVCWebApp.Controllers
         [HttpPost, ActionName("Delete")]
         public IActionResult DeletePost(int? id)
         {
-            Category? categoryObj = _categoryRepo.Get(c => c.Id == id);
+            Category? categoryObj = _unitOfWork.Category.Get(c => c.Id == id);
             if(categoryObj == null)
             {
                 return NotFound();
             }
-            _categoryRepo.Remove(categoryObj);
-            _categoryRepo.Save();
+            _unitOfWork.Category.Remove(categoryObj);
+            _unitOfWork.Save();
             TempData["success"] = "Category deleted successfully";
             return RedirectToAction("Index");
         }
